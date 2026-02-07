@@ -1,3 +1,4 @@
+// @ts-expect-error -- browserbase package has no type declarations
 import Browserbase from "browserbase";
 import type { BrowserbaseSession } from "@repo/shared-types";
 

@@ -28,7 +28,8 @@ export class VoiceManager {
 
     try {
       const audioBuffer = await this.voice.speak(text);
-      await this.playAudio(audioBuffer.buffer.slice(audioBuffer.byteOffset, audioBuffer.byteOffset + audioBuffer.byteLength));
+      const ab = audioBuffer.buffer.slice(audioBuffer.byteOffset, audioBuffer.byteOffset + audioBuffer.byteLength) as ArrayBuffer;
+      await this.playAudio(ab);
     } catch (error) {
       this.handlers.onError?.(error as Error);
     } finally {
