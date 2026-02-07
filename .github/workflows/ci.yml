@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build & Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - run: npm install
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+        working-directory: packages/database
+
+      - name: Build
+        run: npx turbo build
+
+      - name: Lint
+        run: npx turbo lint
+        continue-on-error: true
+
+      - name: Type Check
+        run: npx turbo check-types
+        continue-on-error: true
+
+  mobile:
+    name: Mobile (Expo)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - run: npm install
+
+      - name: Expo Doctor
+        run: npx expo-doctor
+        working-directory: apps/mobile
+        continue-on-error: true
+
+  desktop:
+    name: Desktop (Electron)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - run: npm install
+
+      - name: Build Desktop
+        run: npx turbo build --filter=desktop
