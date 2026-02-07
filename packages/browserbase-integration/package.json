@@ -1,0 +1,22 @@
+{
+  "name": "@repo/browserbase-integration",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "browserbase": "^1.0.0",
+    "playwright-core": "^1.52.0",
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@repo/shared-types": "*"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "*",
+    "typescript": "5.9.2"
+  }
+}

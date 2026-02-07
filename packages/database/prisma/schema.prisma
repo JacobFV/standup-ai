@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  notionUserId   String?
+  linearUserId   String?
+  avatarUrl      String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  standupItems   StandupItem[]
+  sessions       UserSession[]
+  integrations   Integration[]
+}
+
+model StandupSession {
+  id        String        @id @default(cuid())
+  teamId    String
+  date      DateTime
+  status    String        @default("scheduled")
+  summary   String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  items     StandupItem[]
+}
+
+model StandupItem {
+  id              String         @id @default(cuid())
+  userId          String
+  sessionId       String
+  type            String
+  content         String
+  status          String         @default("pending")
+  notionPageId    String?
+  linearIssueId   String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id])
+  session         StandupSession @relation(fields: [sessionId], references: [id])
+}
+
+model UserSession {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Integration {
+  id          String   @id @default(cuid())
+  userId      String
+  type        String
+  accessToken String?
+  refreshToken String?
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, type])
+}
+
+model AgentConversation {
+  id        String          @id @default(cuid())
+  userId    String
+  title     String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  messages  AgentMessage[]
+}
+
+model AgentMessage {
+  id             String            @id @default(cuid())
+  conversationId String
+  role           String
+  content        String
+  metadata       String?
+  createdAt      DateTime          @default(now())
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id])
+}

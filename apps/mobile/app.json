@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "Standup AI",
+    "slug": "standup-ai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "standup-ai",
+    "splash": {
+      "backgroundColor": "#030712"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.standupai.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "Standup AI needs microphone access for voice-based standup updates"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#030712"
+      },
+      "package": "com.standupai.app",
+      "permissions": ["RECORD_AUDIO"]
+    },
+    "plugins": ["expo-router"]
+  }
+}

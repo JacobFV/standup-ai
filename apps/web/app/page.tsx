@@ -1,102 +1,216 @@
-import Image, { type ImageProps } from "next/image";
-import { Button } from "@repo/ui/button";
-import styles from "./page.module.css";
+"use client";
 
-type Props = Omit<ImageProps, "src"> & {
-  srcLight: string;
-  srcDark: string;
-};
+import { useState, useRef, useEffect } from "react";
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+interface Message {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+  actions?: Array<{
+    type: string;
+    description: string;
+    status: "pending" | "done" | "failed";
+  }>;
+}
+
+export default function ChatPage() {
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "welcome",
+      role: "assistant",
+      content:
+        "Hey! I'm your Standup AI assistant. I can help you run standups faster by automatically moving your Notion tasks and Linear issues. Just tell me what you worked on yesterday, what you're doing today, and any blockers — I'll handle the rest.\n\nYou can also talk to me using voice! Click the mic button to start.",
+      timestamp: new Date(),
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceState, setVoiceState] = useState<"idle" | "listening" | "processing" | "speaking">("idle");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  async function sendMessage(content: string) {
+    if (!content.trim()) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: content.trim(),
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: content.trim(),
+          history: messages.map((m) => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
+      });
+
+      const data = await response.json();
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: data.message,
+        timestamp: new Date(),
+        actions: data.actions,
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "Sorry, I ran into an issue. Please check your API keys in Settings and try again.",
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function toggleVoice() {
+    if (isListening) {
+      setIsListening(false);
+      setVoiceState("processing");
+      // Voice processing would happen here
+      setTimeout(() => setVoiceState("idle"), 1000);
+    } else {
+      setIsListening(true);
+      setVoiceState("listening");
+    }
+  }
 
   return (
-    <>
-      <Image {...rest} src={srcLight} className="imgLight" />
-      <Image {...rest} src={srcDark} className="imgDark" />
-    </>
-  );
-};
-
-export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <ThemeImage
-          className={styles.logo}
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>apps/web/app/page.tsx</code>
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.dev/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold">Standup Chat</h2>
+          <p className="text-sm text-gray-400">Talk naturally — I&apos;ll move your tasks</p>
         </div>
-        <Button appName="web" className={styles.secondary}>
-          Open alert
-        </Button>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+        <div className="flex items-center gap-3">
+          <span className={`text-xs px-2 py-1 rounded-full ${
+            voiceState === "listening" ? "bg-red-900/50 text-red-400" :
+            voiceState === "speaking" ? "bg-blue-900/50 text-blue-400" :
+            voiceState === "processing" ? "bg-yellow-900/50 text-yellow-400" :
+            "bg-gray-800 text-gray-400"
+          }`}>
+            {voiceState === "listening" ? "Listening..." :
+             voiceState === "speaking" ? "Speaking..." :
+             voiceState === "processing" ? "Processing..." :
+             "Voice ready"}
+          </span>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`max-w-[70%] px-4 py-3 ${
+                message.role === "user" ? "chat-bubble-user" : "chat-bubble-assistant"
+              }`}
+            >
+              <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+              {message.actions && message.actions.length > 0 && (
+                <div className="mt-3 border-t border-gray-700 pt-2 space-y-1">
+                  {message.actions.map((action, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs">
+                      <span className={
+                        action.status === "done" ? "text-green-400" :
+                        action.status === "failed" ? "text-red-400" :
+                        "text-yellow-400"
+                      }>
+                        {action.status === "done" ? "\u2713" : action.status === "failed" ? "\u2717" : "\u27F3"}
+                      </span>
+                      <span className="text-gray-400">{action.description}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="text-xs text-gray-500 mt-1">
+                {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </p>
+            </div>
+          </div>
+        ))}
+
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="chat-bubble-assistant px-4 py-3">
+              <div className="flex gap-1">
+                <div className="typing-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="typing-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+                <div className="typing-dot w-2 h-2 bg-gray-400 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-800 px-6 py-4">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={toggleVoice}
+            className={`p-3 rounded-full transition-colors ${
+              isListening
+                ? "bg-red-600 hover:bg-red-700 animate-pulse"
+                : "bg-gray-800 hover:bg-gray-700"
+            }`}
+            title={isListening ? "Stop listening" : "Start voice input"}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+            </svg>
+          </button>
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(input);
+              }
+            }}
+            placeholder="Tell me your standup update..."
+            className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500"
+            disabled={isLoading}
           />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.dev?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.dev →
-        </a>
-      </footer>
+          <button
+            onClick={() => sendMessage(input)}
+            disabled={isLoading || !input.trim()}
+            className="px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm font-medium transition-colors"
+          >
+            Send
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

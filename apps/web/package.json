@@ -11,10 +11,17 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@repo/agent-core": "*",
+    "@repo/browserbase-integration": "*",
+    "@repo/linear-integration": "*",
+    "@repo/notion-integration": "*",
+    "@repo/shared-types": "*",
     "@repo/ui": "*",
+    "@repo/voice": "*",
     "next": "16.1.5",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@repo/eslint-config": "*",

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Standup AI - Desktop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #030712;
+      color: #f9fafb;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-app-region: drag;
+    }
+    .titlebar {
+      height: 38px;
+      display: flex;
+      align-items: center;
+      padding: 0 80px;
+      font-size: 13px;
+      color: #9ca3af;
+      font-weight: 500;
+      background: #0a0f1a;
+      flex-shrink: 0;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      -webkit-app-region: no-drag;
+      overflow: hidden;
+    }
+    .header {
+      padding: 16px 24px;
+      border-bottom: 1px solid #1f2937;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h2 { font-size: 16px; font-weight: 600; }
+    .header p { font-size: 13px; color: #6b7280; }
+    .status-badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #065f46;
+      color: #6ee7b7;
+    }
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .msg {
+      max-width: 70%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .msg.user {
+      align-self: flex-end;
+      background: #1e40af;
+      border-bottom-right-radius: 4px;
+    }
+    .msg.assistant {
+      align-self: flex-start;
+      background: #1f2937;
+      border-bottom-left-radius: 4px;
+    }
+    .msg .actions {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #374151;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .input-area {
+      padding: 16px 24px;
+      border-top: 1px solid #1f2937;
+      display: flex;
+      gap: 10px;
+    }
+    .mic-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: #1f2937;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .mic-btn:hover { background: #374151; }
+    .mic-btn.active { background: #991b1b; animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    input[type="text"] {
+      flex: 1;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: #3b82f6; }
+    input[type="text"]::placeholder { color: #6b7280; }
+    .send-btn {
+      padding: 10px 20px;
+      background: #2563eb;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .send-btn:hover { background: #1d4ed8; }
+    .send-btn:disabled { opacity: 0.5; cursor: default; }
+    .control-panel {
+      padding: 12px 24px;
+      background: #0a0f1a;
+      border-top: 1px solid #1f2937;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .control-btn {
+      padding: 6px 12px;
+      background: #1f2937;
+      border: 1px solid #374151;
+      border-radius: 6px;
+      color: #d1d5db;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .control-btn:hover { background: #374151; border-color: #4b5563; }
+  </style>
+</head>
+<body>
+  <div class="titlebar">Standup AI Desktop</div>
+  <div class="main">
+    <div class="header">
+      <div>
+        <h2>Agent Chat</h2>
+        <p>Computer control enabled — the agent can move your tasks</p>
+      </div>
+      <span class="status-badge" id="statusBadge">Computer Control Active</span>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="msg assistant">
+        Hey! I'm your Standup AI with full desktop control. I can click through Notion and Linear to move your tasks. Just tell me your standup update!
+      </div>
+    </div>
+
+    <div class="control-panel">
+      <button class="control-btn" onclick="takeScreenshot()">📸 Screenshot</button>
+      <button class="control-btn" onclick="openNotion()">📝 Open Notion</button>
+      <button class="control-btn" onclick="openLinear()">📊 Open Linear</button>
+      <button class="control-btn" onclick="showSettings()">⚙️ Settings</button>
+    </div>
+
+    <div class="input-area">
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()">🎙</button>
+      <input
+        type="text"
+        id="chatInput"
+        placeholder="Tell me your standup update..."
+        onkeydown="if(event.key==='Enter')sendMessage()"
+      />
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const messagesEl = document.getElementById('messages');
+    const inputEl = document.getElementById('chatInput');
+    const micBtn = document.getElementById('micBtn');
+    let isListening = false;
+
+    function addMessage(role, content) {
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.textContent = content;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+
+      addMessage('user', text);
+      inputEl.value = '';
+      document.getElementById('sendBtn').disabled = true;
+
+      try {
+        if (window.electronAPI) {
+          const result = await window.electronAPI.agent.chat(text);
+          if (result.error) {
+            addMessage('assistant', 'Error: ' + result.error);
+          } else {
+            addMessage('assistant', result.message);
+          }
+        } else {
+          // Fallback for dev without electron
+          setTimeout(() => {
+            addMessage('assistant', "I'll move those tasks for you! Let me take a screenshot first to see your screen...");
+          }, 500);
+        }
+      } catch (err) {
+        addMessage('assistant', 'Something went wrong: ' + err.message);
+      }
+
+      document.getElementById('sendBtn').disabled = false;
+    }
+
+    function toggleMic() {
+      isListening = !isListening;
+      micBtn.className = `mic-btn ${isListening ? 'active' : ''}`;
+      micBtn.textContent = isListening ? '🔴' : '🎙';
+    }
+
+    async function takeScreenshot() {
+      if (window.electronAPI) {
+        const result = await window.electronAPI.screen.capture();
+        addMessage('assistant', result.image ? 'Screenshot captured!' : 'Screenshot failed: ' + result.error);
+      }
+    }
+
+    function openNotion() {
+      if (window.electronAPI) {
+        window.electronAPI.computer.keyPress(['cmd', 'space']).then(() => {
+          setTimeout(() => window.electronAPI.computer.type('Notion\n'), 300);
+        });
+      }
+    }
+
+    function openLinear() {
+      if (window.electronAPI) {
+        window.electronAPI.computer.keyPress(['cmd', 'space']).then(() => {
+          setTimeout(() => window.electronAPI.computer.type('Linear\n'), 300);
+        });
+      }
+    }
+
+    function showSettings() {
+      addMessage('assistant', 'Settings: Set ANTHROPIC_API_KEY, NOTION_API_KEY, LINEAR_API_KEY, CARTESIA_API_KEY, BROWSERBASE_API_KEY in your .env file or use the init command.');
+    }
+
+    // Initialize agent on startup
+    if (window.electronAPI) {
+      // Try to init with stored key
+      const apiKey = localStorage.getItem('anthropicApiKey');
+      if (apiKey) {
+        window.electronAPI.agent.init({ anthropicApiKey: apiKey });
+      }
+    }
+  </script>
+</body>
+</html>

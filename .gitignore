@@ -36,3 +36,20 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# Database
+*.db
+*.db-journal
+prisma/migrations
+
+# Electron
+apps/desktop/dist/
+
+# Expo
+apps/mobile/.expo/
+apps/mobile/ios/
+apps/mobile/android/
+
+# Credentials
+*.credential
+*.key
