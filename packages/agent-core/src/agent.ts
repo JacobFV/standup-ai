@@ -5,7 +5,7 @@ import { AGENT_TOOLS } from "./tools.js";
 
 interface Message {
   role: "user" | "assistant";
-  content: string | Anthropic.ContentBlock[];
+  content: string | Anthropic.ContentBlock[] | Anthropic.ToolResultBlockParam[];
 }
 
 export class ScrumAgent {
