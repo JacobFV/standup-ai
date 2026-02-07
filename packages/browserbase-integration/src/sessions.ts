@@ -1,5 +1,5 @@
 import { chromium } from "playwright-core";
-import type { BrowserbaseClient } from "./client";
+import type { BrowserbaseClient } from "./client.js";
 
 export async function createBrowserSession(client: BrowserbaseClient) {
   const session = await client.createSession();

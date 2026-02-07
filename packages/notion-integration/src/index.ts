@@ -1,2 +1,2 @@
-export { NotionClient } from "./client";
-export { notionMcpTools, handleNotionMcpTool } from "./mcp";
+export { NotionClient } from "./client.js";
+export { notionMcpTools, handleNotionMcpTool } from "./mcp.js";

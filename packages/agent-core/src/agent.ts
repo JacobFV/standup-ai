@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { SYSTEM_PROMPT } from "./prompts";
-import type { AgentConfig, ToolHandler } from "./tools";
-import { AGENT_TOOLS } from "./tools";
+import { SYSTEM_PROMPT } from "./prompts.js";
+import type { AgentConfig, ToolHandler } from "./tools.js";
+import { AGENT_TOOLS } from "./tools.js";
 
 interface Message {
   role: "user" | "assistant";

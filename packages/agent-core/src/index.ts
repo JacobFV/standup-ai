@@ -1,4 +1,4 @@
-export { ScrumAgent } from "./agent";
-export { SYSTEM_PROMPT, buildStandupPrompt } from "./prompts";
-export type { AgentTool, ToolHandler, AgentConfig } from "./tools";
-export { createToolHandlers, AGENT_TOOLS } from "./tools";
+export { ScrumAgent } from "./agent.js";
+export { SYSTEM_PROMPT, buildStandupPrompt } from "./prompts.js";
+export type { AgentTool, ToolHandler, AgentConfig } from "./tools.js";
+export { createToolHandlers, AGENT_TOOLS } from "./tools.js";

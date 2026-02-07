@@ -1,6 +1,6 @@
 import { CartesiaClient } from "@cartesia/cartesia-js";
-import type { VoiceConfig } from "./types";
-import { DEFAULT_VOICE_ID, DEFAULT_MODEL_ID } from "./types";
+import type { VoiceConfig } from "./types.js";
+import { DEFAULT_VOICE_ID, DEFAULT_MODEL_ID } from "./types.js";
 
 export class CartesiaVoice {
   private client: CartesiaClient;

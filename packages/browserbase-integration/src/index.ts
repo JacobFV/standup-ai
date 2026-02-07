@@ -1,2 +1,2 @@
-export { BrowserbaseClient } from "./client";
-export { createBrowserSession, loginToNotion, loginToLinear } from "./sessions";
+export { BrowserbaseClient } from "./client.js";
+export { createBrowserSession, loginToNotion, loginToLinear } from "./sessions.js";

@@ -1,1 +1,1 @@
-export { LinearClient } from "./client";
+export { LinearClient } from "./client.js";

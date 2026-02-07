@@ -1,5 +1,5 @@
-import type { VoiceConfig, VoiceEventHandler } from "./types";
-import { CartesiaVoice } from "./cartesia";
+import type { VoiceConfig, VoiceEventHandler } from "./types.js";
+import { CartesiaVoice } from "./cartesia.js";
 import type { VoiceState } from "@repo/shared-types";
 
 export class VoiceManager {

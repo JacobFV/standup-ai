@@ -1,3 +1,3 @@
-export { CartesiaVoice } from "./cartesia";
-export { VoiceManager } from "./manager";
-export type { VoiceConfig, VoiceEventHandler } from "./types";
+export { CartesiaVoice } from "./cartesia.js";
+export { VoiceManager } from "./manager.js";
+export type { VoiceConfig, VoiceEventHandler } from "./types.js";
