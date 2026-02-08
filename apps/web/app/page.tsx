@@ -20,7 +20,7 @@ export default function ChatPage() {
       id: "welcome",
       role: "assistant",
       content:
-        "Hey! I'm your Standup AI assistant. I can help you run standups faster by automatically moving your Notion tasks and Linear issues. Just tell me what you worked on yesterday, what you're doing today, and any blockers — I'll handle the rest.\n\nYou can also talk to me using voice! Click the mic button to start.",
+        "Good Morning, Tiffany! Add your Notion tasks and Linear issues and tell me what you worked on yesterday, what you're doing today, and any blockers — I'll handle the rest. Talk to me --Click the mic button to start.",
       timestamp: new Date(),
     },
   ]);
