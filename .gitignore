@@ -53,3 +53,6 @@ apps/mobile/android/
 # Credentials
 *.credential
 *.key
+
+# Local environment variables
+.env.local
